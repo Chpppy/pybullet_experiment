@@ -1,0 +1,187 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="drawer">
+    <xacro:property name="thickness" value="0.02"/>
+    <xacro:property name="x_position" value="0"/>
+    <xacro:property name="y_position" value="0"/>
+    <xacro:property name="z_position" value="0"/>
+
+    <xacro:include filename="$(find hyrobot)/urdf/objects_xacro/calc_inertial.xacro"/>
+
+    <material name="yellow">
+        <color rgba="1.0 0.9 0.0 1.0"/>
+    </material>
+
+    <xacro:macro name="open_cuboid" params="prefix length width height mass">
+        <link name="${prefix}_drawer_base">
+            <xacro:box_inertial m="${mass}" x="${length}" y="${width}" z="${thickness}"/>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_base_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <material name="yellow"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_base_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <surface>
+                    <friction>
+                        <ode>
+                            <mu>0.5</mu>
+                        </ode>
+                    </friction>
+                </surface>
+            </collision>
+        </link>
+        
+        <!--drawer_front-->
+        <link name="${prefix}_drawer_front">
+            <xacro:box_inertial m="${mass}" x="${thickness}" y="${width}" z="${height-thickness}"/>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_front_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <material name="yellow"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_front_visual.obj" scale="1 1 1"/>
+                </geometry>
+            </collision>
+        </link>
+        <joint name="${prefix}_front2base" type="fixed">
+            <origin xyz="${length/2 - thickness/2} ${height/2} 0.0" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_drawer_base"/>
+            <child link="${prefix}_drawer_front"/>
+        </joint>
+        <!--drawer_back-->
+        <link name="${prefix}_drawer_back">
+            <xacro:box_inertial m="${mass}" x="${thickness}" y="${width}" z="${height-thickness}"/>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_back_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <material name="yellow"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_back_visual.obj" scale="1 1 1"/>
+                </geometry>
+            </collision>
+        </link>
+        <joint name="${prefix}_back2base" type="fixed">
+            <origin xyz="${-length/2 + thickness/2} ${height/2} 0.0" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_drawer_base"/>
+            <child link="${prefix}_drawer_back"/>
+        </joint>
+        <!--drawer_left-->
+        <link name="${prefix}_drawer_left">
+            <xacro:box_inertial m="${mass}" x="${length - 2*thickness}" y="${thickness}" z="${height-thickness}"/>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_left_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <material name="yellow"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_left_visual.obj" scale="1 1 1"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="${prefix}_left2base" type="fixed">
+            <origin xyz="0.0 ${height/2} ${-width/2 + thickness/2}" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_drawer_base"/>
+            <child link="${prefix}_drawer_left"/>
+        </joint>
+
+        <!--drawer_right-->
+        <link name="${prefix}_drawer_right">
+            <xacro:box_inertial m="${mass}" x="${length - 2*thickness}" y="${thickness}" z="${height-thickness}"/>
+            <visual>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_right_visual.obj" scale="1 1 1"/>
+                </geometry>
+                <material name="yellow"/>
+            </visual>
+            <collision>
+                <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0"/>
+                <geometry>
+                    <mesh filename="../../meshes/drawer/${prefix}_drawer_right_visual.obj" scale="1 1 1"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <joint name="${prefix}_right2base" type="fixed">
+            <origin xyz="0.0 ${height/2} ${width/2 - thickness/2}" rpy="0.0 0.0 0.0"/>
+            <parent link="${prefix}_drawer_base"/>
+            <child link="${prefix}_drawer_right"/>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="add_drawer" params="prefix drawer_height drawer_width drawer_length drawer_handle">
+        <xacro:open_cuboid prefix="${prefix}_in" length="${drawer_length}" width="${drawer_width}" height="${drawer_height}" mass="1"/>
+        <xacro:open_cuboid prefix="${prefix}_out" length="${drawer_height + thickness * 3}" width="${drawer_width + thickness * 3}" height="${drawer_length + thickness * 2}" mass="100"/>
+        <joint name="${prefix}_in2out" type="prismatic">
+            <origin xyz="${drawer_height/2 - thickness/4} ${drawer_length/2+thickness*2} 0.0" rpy="0.0 0.0 ${pi/2}"/>
+            <parent link="${prefix}_out_drawer_base"/>
+            <child link="${prefix}_in_drawer_base"/>
+            <axis xyz="1 0 0"/>
+            <limit lower="0.0" upper="1.0" effort="0.0" velocity="0.0"/>
+            <dynamics damping = "10.0"/>
+        </joint>
+
+        <link name="${prefix}_handle">
+            <visual>
+                <geometry>
+                <box size="0.01 0.1 0.02"/>
+                </geometry>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+                <material name="silver">
+                <color rgba="0.75 0.75 0.75 1.0"/>
+                </material>
+            </visual>
+            <collision>
+                <geometry>
+                <box size="0.01 0.1 0.02"/>
+                </geometry>
+                <origin xyz="0 0 0" rpy="0 0 0"/>
+            </collision>
+            <xacro:box_inertial m="0.5" x="0.01" y="0.1" z="0.02"/>
+        </link>
+
+        <!-- 把手与抽屉前板的连接 -->
+        <joint name="${prefix}_handle_joint" type="fixed">
+            <parent link="${prefix}_in_drawer_front"/>
+            <child link="${prefix}_handle"/>
+            <origin xyz="0.1 0.03 0" rpy="${pi/2} 0 0"/>
+        </joint>
+
+    </xacro:macro>
+
+    <xacro:add_drawer prefix="drawer1" drawer_length="0.3" drawer_width="0.5" drawer_height="0.15" drawer_handle="0.04"/>
+    <link name="virtual__drawer_link"/>
+    <joint name="drawer12world" type="fixed">
+        <origin xyz="0.0 0.0 0.0" rpy="0.0 ${pi/2} ${pi}"/>
+        <parent link="virtual__drawer_link"/>
+        <child link="drawer1_out_drawer_base"/>
+        <axis xyz="0.0 0.0 0.0"/>
+        <limit lower="0.0" upper="0.0" effort="0.0" velocity="0.0"/>
+    </joint>
+    <!-- <link name="world"/>
+    <joint name="virtual__drawer_link2world" type="fixed">
+        <origin rpy="0.0 0.0 0.0" xyz="${x_position} ${y_position} ${z_position}"/>
+        <parent link="world"/>
+        <child link="virtual__drawer_link"/>
+    </joint> -->
+</robot>
