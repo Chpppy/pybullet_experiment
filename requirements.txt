@@ -1,5 +1,7 @@
 numpy==1.24.4
+opencv-python==4.10.0.84
 pybullet==3.2.7
+scipy==1.10.1
 tensorboard==2.14.0
 tensorboard-data-server==0.7.2
 tensorboardX==2.6.2.2
